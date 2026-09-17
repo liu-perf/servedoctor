@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "servedoctor"
+version = "0.1.0"
+description = "Whether an inference-serving benchmark measured the server or the load generator: open/closed loop detection, coordinated omission, tail-quantile confidence, queueing lower bounds, and goodput."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.9"
+authors = [{ name = "liu-perf" }]
+keywords = ["llm", "inference", "serving", "benchmark", "latency", "slo", "queueing"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Benchmark",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+# No dependencies, on purpose -- and here it costs something, because the tail
+# statistics would have been three lines of scipy. They are written out instead:
+# the quantile confidence interval is the exact binomial order-statistic one, and
+# a reader who wants to check it needs no environment, only the file.
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "ruff>=0.5"]
+
+[project.urls]
+Homepage = "https://github.com/liu-perf/servedoctor"
+Documentation = "https://liu-perf.github.io/servedoctor/"
+
+[project.scripts]
+servedoctor = "servedoctor.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["servedoctor*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+# Pinned explicitly rather than left to whatever the installed ruff defaults to, so
+# that a new ruff release cannot turn a green CI red without anybody changing code.
+# Same set as the other six repositories in this series.
+select = ["E4", "E7", "E9", "F", "B", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

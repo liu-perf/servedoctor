@@ -1,0 +1,70 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Syntax check every file
+        run: python -m compileall -q servedoctor tests examples
+
+      # Nothing here needs a GPU, a model or a network, and that is a property of
+      # the subject rather than a convenience: coordinated omission, quantile
+      # support and censoring are facts about the load generator and the sample, so
+      # they are checkable for free. The one script that needs a wall clock --
+      # examples/coordinated_omission.py -- is run by hand and its output is pasted
+      # into docs/closed-vs-open.md, because a timing-sensitive test that fails on a
+      # busy runner teaches people to ignore failures.
+      - name: Tests
+        run: pytest -q
+
+      # A generated fixture that has drifted from its generator is a fixture nobody
+      # can check. Same guarantee the byte-identical bundle bootstrap gives, applied
+      # to test data.
+      - name: Fixtures are reproducible from their generator
+        run: |
+          python tests/fixtures/make_fixtures.py
+          git diff --exit-code -- tests/fixtures/
+
+      - name: The CLI actually runs
+        run: |
+          servedoctor rules
+          servedoctor audit    tests/fixtures/EXAMPLE_open_loop.csv --ttft-ms 500
+          servedoctor closure  tests/fixtures/EXAMPLE_closed_loop.csv
+          servedoctor latency  tests/fixtures/EXAMPLE_short_200.csv
+          servedoctor slo      tests/fixtures/EXAMPLE_open_loop.csv --e2e-ms 2000
+          servedoctor queueing tests/fixtures/EXAMPLE_open_loop.csv
+          servedoctor sweep    tests/fixtures/EXAMPLE_ladder_*.csv --e2e-ms 3000
+          servedoctor compare  tests/fixtures/EXAMPLE_ladder_40.csv \
+                               tests/fixtures/EXAMPLE_ladder_70.csv
+
+      # The gate has to be able to fail, or it is decoration. A closed-loop capture
+      # must trip --fail-on violation; the open-loop one must not.
+      - name: The gate can fail
+        run: |
+          ! servedoctor audit tests/fixtures/EXAMPLE_closed_loop.csv \
+              --rule SD002 --fail-on violation
+          servedoctor audit tests/fixtures/EXAMPLE_open_loop.csv \
+              --rule SD002 --fail-on violation

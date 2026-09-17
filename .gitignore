@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Real load-test output. A per-request log names a specific endpoint, a specific
+# model deployment and a specific hour, and the tail of it is exactly the part
+# somebody would rather not publish. The fixtures ship worked examples instead.
+examples/_run.csv
+*.local.csv
+*.local.json
+runs_*/

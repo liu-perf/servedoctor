@@ -1,0 +1,19 @@
+{
+  "_comment": "EXAMPLE -- synthetic. The same run as EXAMPLE_open_loop.csv, reduced to the shape a serving benchmark prints at the end. Every distributional question in it has already been answered and cannot be re-asked: that is the point of the file. max_concurrency is deliberately the closed-loop run's 7, the way a number gets carried over when two configurations are edited in the same file -- Little's Law is what catches it, because 6.278 req/s x 4.34 s is 27 requests in flight, not 7.",
+  "completed": 2000,
+  "duration": 318.5745993563413,
+  "max_concurrency": 7,
+  "mean_e2el_ms": 4341.605956528021,
+  "mean_tpot_ms": 8.614557452298305,
+  "mean_ttft_ms": 3141.3459565280214,
+  "median_ttft_ms": 1926.6972123790538,
+  "output_throughput": 879.119052698654,
+  "p99_e2el_ms": 13482.453376393663,
+  "p99_tpot_ms": 8.173913043478365,
+  "p99_ttft_ms": 12306.588100665253,
+  "request_rate": 6.277964420392794,
+  "request_throughput": 6.277964420392794,
+  "total_input_tokens": 1122701,
+  "total_output_tokens": 280065,
+  "total_token_throughput": 4403.257519068359
+}
