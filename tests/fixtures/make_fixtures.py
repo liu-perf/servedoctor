@@ -1,5 +1,10 @@
 """Generate every fixture in this directory, deterministically, from one model.
 
+Every float sum below is math.fsum, not sum. CPython 3.12 made sum()
+use Neumaier compensation, so the same code produced different last
+digits on 3.9 and 3.12 -- and this file's output is committed and
+hash-checked. fsum is correctly rounded on every version.
+
     python tests/fixtures/make_fixtures.py
 
 CI re-runs this and then `git diff --exit-code`, so a fixture that has drifted from
@@ -55,6 +60,7 @@ in the data is what a finite draw produced. Sanding that off would remove the ve
 thing SD004 is about.
 """
 import os
+import math
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -381,12 +387,12 @@ def main():
         "total_token_throughput": sum(r["tin"] + r["tout"] for r in opened) / ospan,
         "total_input_tokens": sum(r["tin"] for r in opened),
         "total_output_tokens": sum(r["tout"] for r in opened),
-        "mean_ttft_ms": 1e3 * sum(ttfts) / len(ttfts),
+        "mean_ttft_ms": 1e3 * math.fsum(ttfts) / len(ttfts),
         "median_ttft_ms": 1e3 * q(ttfts, 0.5),
         "p99_ttft_ms": 1e3 * q(ttfts, 0.99),
-        "mean_tpot_ms": 1e3 * sum(tpots) / len(tpots),
+        "mean_tpot_ms": 1e3 * math.fsum(tpots) / len(tpots),
         "p99_tpot_ms": 1e3 * q(tpots, 0.99),
-        "mean_e2el_ms": 1e3 * sum(lats) / len(lats),
+        "mean_e2el_ms": 1e3 * math.fsum(lats) / len(lats),
         "p99_e2el_ms": 1e3 * q(lats, 0.99),
         "max_concurrency": CLOSED_WORKERS,
         "request_rate": orate,
