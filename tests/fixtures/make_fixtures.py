@@ -59,8 +59,8 @@ declared rate in each file's header is what the generator was asked for; the rat
 in the data is what a finite draw produced. Sanding that off would remove the very
 thing SD004 is about.
 """
-import os
 import math
+import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
